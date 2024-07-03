@@ -202,4 +202,21 @@ function goActive() {
     delay:0 
   });
   startTimer();
-}
+  document.addEventListener('DOMContentLoaded', function() {
+  const contactBtn = document.getElementById('contact-btn');
+  
+  if (contactBtn) {
+    contactBtn.addEventListener('click', function(event) {
+      event.preventDefault(); // Prevenir el comportamiento por defecto del enlace
+      
+      // Dirección de correo electrónico a la que se enviará el correo
+      const emailAddress = 'gumbbl.com@gmail.com';
+      
+      // Crear el enlace para enviar el correo
+      const mailToLink = 'mailto:' + encodeURIComponent(emailAddress);
+      
+      // Abrir el cliente de correo electrónico del usuario
+      window.location.href = mailToLink;
+    });
+  }
+});
