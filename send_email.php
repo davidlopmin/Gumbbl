@@ -1,20 +1,30 @@
 <?php
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $name = htmlspecialchars($_POST['name']);
-    $email = htmlspecialchars($_POST['email']);
-    $message = htmlspecialchars($_POST['message']);
-    
-    $to = "gumbbl.com@gmail.com";
-    $subject = "New contact form submission";
-    $body = "Name: $name\nEmail: $email\n\nMessage:\n$message";
-    $headers = "From: $email";
+    // Recoger los datos del formulario
+    $name = $_POST['name'];
+    $email = $_POST['email'];
+    $message = $_POST['message'];
 
-    if (mail($to, $subject, $body, $headers)) {
-        echo "Message successfully sent!";
+    // Validar los datos (opcional - puedes añadir más validaciones según sea necesario)
+
+    // Configurar el correo electrónico
+    $to = "gumbbl.com@gmail.com";
+    $subject = "Mensaje de contacto desde tu sitio web";
+    $body = "Nombre: $name\nCorreo electrónico: $email\nMensaje:\n$message";
+
+    // Enviar el correo electrónico
+    if (mail($to, $subject, $body)) {
+        // Éxito - redirigir a una página de confirmación o mostrar un mensaje de éxito
+        header("Location: thankyou.html"); // Redirige a una página de agradecimiento
+        exit();
     } else {
-        echo "Message sending failed.";
+        // Error - redirigir a una página de error o mostrar un mensaje de error
+        header("Location: error.html"); // Redirige a una página de error
+        exit();
     }
 } else {
-    echo "Invalid request.";
+    // Si alguien intenta acceder a este script directamente sin enviar datos por POST, redirigir a la página de contacto
+    header("Location: contact.html");
+    exit();
 }
 ?>
