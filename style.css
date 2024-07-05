@@ -20,7 +20,7 @@
 }
 :root[data-theme="dark"] {
  --c11:black;
- --c0:white;
+ --c0:black;
  --filter-01:url(#turbulence-effect);
 }
 :root[data-theme="grey"] {
