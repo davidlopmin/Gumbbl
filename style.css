@@ -14,7 +14,7 @@
  --filter-01:url(#turbulence-effect);
 }
 :root[data-theme="light"] {
- --c11:white;
+ --c11:black;
  --c0:black;
  --filter-01:url(#pixelate-effect);
 }
