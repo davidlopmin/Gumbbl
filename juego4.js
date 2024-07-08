@@ -1,101 +1,93 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const cells = document.querySelectorAll('.cell');
-    const message = document.getElementById('message');
-    const playButton = document.getElementById('playButton');
-    const fichasElement = document.getElementById('fichas');
+let player = null;
+let playerGoal = null;
+let fichas = 100;
+let bet = null;
 
-    let playerRole;
-    let playerChoice;
-    let botChoice;
-    let timer;
-    let fichas = 100;
+document.addEventListener("DOMContentLoaded", function() {
+    const cells = document.querySelectorAll(".cell");
+    const message = document.getElementById("message");
+    const playButton = document.getElementById("playButton");
+    const fichasSpan = document.getElementById("fichas");
+    const betButtons = document.querySelectorAll(".bet-button");
 
-    const initializeGame = () => {
-        playerRole = Math.random() < 0.5 ? 1 : 2;
-        playerChoice = null;
-        botChoice = null;
-
-        message.textContent = `You are Player ${playerRole}.`;
-        updateCellColors();
-        cells.forEach(cell => cell.addEventListener('click', handleClick));
-        playButton.style.display = 'none';
-
-        timer = setTimeout(() => {
-            if (playerChoice === null) {
-                message.textContent = 'Time\'s up! LOSE';
-                updateFichas(false);
-                endGame();
-            }
-        }, 10000);
-    };
-
-    const updateCellColors = () => {
-        cells.forEach(cell => cell.classList.remove('blue', 'red', 'half-blue-half-red'));
-
-        if (playerRole === 1) {
-            cells[0].classList.add('blue');
-            cells[1].classList.add('red');
-        } else {
-            cells[0].classList.add('half-blue-half-red');
-            cells[1].classList.add('half-blue-half-red');
-        }
-    };
-
-    const handleClick = (event) => {
-        if (playerChoice === null) {
-            playerChoice = event.target.id === 'cell1' ? 1 : 2;
-            highlightCell(event.target);
-            checkWinner();
-        }
-    };
-
-    const highlightCell = (cell) => {
-        cell.classList.add('chosen');
-    };
-
-    const checkWinner = () => {
-        clearTimeout(timer);
-
-        if (playerRole === 1) {
-            botChoice = Math.random() < 0.5 ? 1 : 2; // Simular elección aleatoria del bot
-            highlightCell(cells[botChoice - 1]); // Marcar la casilla elegida por el bot
-            if (playerChoice === botChoice) {
-                message.textContent = 'WIN';
-                updateFichas(true);
-            } else {
-                message.textContent = 'LOSE';
-                updateFichas(false);
-            }
-        } else {
-            botChoice = playerChoice === 1 ? 2 : 1; // Simular elección contraria al jugador
-            highlightCell(cells[botChoice - 1]); // Marcar la casilla elegida por el bot
-            if (playerChoice !== botChoice) {
-                message.textContent = 'WIN';
-                updateFichas(true);
-            } else {
-                message.textContent = 'LOSE';
-                updateFichas(false);
-            }
-        }
-        endGame();
-    };
-
-    const updateFichas = (won) => {
-        fichas = won ? fichas + 1 : fichas - 1;
-        fichasElement.textContent = fichas;
-    };
-
-    const endGame = () => {
-        cells.forEach(cell => cell.removeEventListener('click', handleClick));
-        playButton.style.display = 'inline-block';
-    };
-
-    playButton.addEventListener('click', () => {
-        cells.forEach(cell => {
-            cell.classList.remove('chosen');
+    betButtons.forEach(button => {
+        button.addEventListener("click", function() {
+            bet = parseInt(this.getAttribute("data-value"));
+            startGame();
         });
-        initializeGame();
     });
 
-    initializeGame();
+    cells.forEach(cell => {
+        cell.addEventListener("click", function() {
+            if (!player) return;
+            determineWinner(this.id);
+        });
+    });
+
+    function startGame() {
+        player = Math.random() < 0.5 ? 1 : 2;
+        playerGoal = player === 1 ? "same" : "different";
+        highlightCells();
+        message.textContent = "Choose a cell";
+    }
+
+    function highlightCells() {
+        const cell1 = document.getElementById("cell1");
+        const cell2 = document.getElementById("cell2");
+
+        if (playerGoal === "same") {
+            cell1.classList.add("half-blue-half-red");
+            cell2.classList.add("half-blue-half-red");
+        } else {
+            cell1.classList.add("blue");
+            cell2.classList.add("red");
+        }
+
+        setTimeout(() => {
+            cell1.classList.remove("half-blue-half-red", "blue", "red");
+            cell2.classList.remove("half-blue-half-red", "blue", "red");
+        }, 2500);
+    }
+
+    function determineWinner(cellId) {
+        const botChoice = Math.random() < 0.5 ? "cell1" : "cell2";
+        const playerChoice = cellId;
+
+        let result;
+        if (playerGoal === "same") {
+            result = (playerChoice === botChoice) ? "WIN" : "LOSE";
+        } else {
+            result = (playerChoice !== botChoice) ? "WIN" : "LOSE";
+        }
+
+        message.textContent = result;
+        updateFichas(result);
+        setTimeout(() => {
+            playButton.style.display = "block";
+        }, 2500);
+    }
+
+    playButton.addEventListener("click", function() {
+        resetGame();
+        this.style.display = "none";
+    });
+
+    function updateFichas(result) {
+        if (result === "WIN") {
+            fichas += bet;
+        } else {
+            fichas -= bet;
+        }
+        fichasSpan.textContent = fichas;
+    }
+
+    function resetGame() {
+        player = null;
+        playerGoal = null;
+        bet = null;
+        message.textContent = "";
+        betButtons.forEach(button => {
+            button.style.display = "inline-block";
+        });
+    }
 });
