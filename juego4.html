@@ -4,14 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mini Game</title>
-    <link rel="stylesheet" href="juego4.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div id="scoreboard">
         <div class="circle">
-            <img src="images/logoGumbbl.png" alt="Logo" id="logoGumbbl">
+            <img src="images/new-logo.png" alt="Logo" id="new-logo">
         </div>
         <span id="fichas">100</span>
+    </div>
+    <div id="betting-section">
+        <span>Select your bet:</span>
+        <button class="bet-button" data-value="1">1</button>
+        <button class="bet-button" data-value="2">2</button>
+        <button class="bet-button" data-value="5">5</button>
+        <button class="bet-button" data-value="10">10</button>
+        <button class="bet-button" data-value="20">20</button>
+        <button class="bet-button" data-value="50">50</button>
+        <button class="bet-button" data-value="100">100</button>
     </div>
     <div class="game-container">
         <div class="cell" id="cell1"></div>
@@ -19,7 +29,6 @@
     </div>
     <div id="message"></div>
     <button id="playButton">PLAY</button>
-    <script src="juego4.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
-
