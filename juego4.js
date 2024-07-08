@@ -2,6 +2,7 @@ let player = null;
 let playerGoal = null;
 let fichas = 100;
 let bet = null;
+let gameOver = false;
 
 document.addEventListener("DOMContentLoaded", function() {
     const cells = document.querySelectorAll(".cell");
@@ -12,14 +13,19 @@ document.addEventListener("DOMContentLoaded", function() {
 
     betButtons.forEach(button => {
         button.addEventListener("click", function() {
+            if (gameOver) return;
             bet = parseInt(this.getAttribute("data-value"));
+            if (bet > fichas) {
+                alert("You don't have enough fichas to place this bet!");
+                return;
+            }
             startGame();
         });
     });
 
     cells.forEach(cell => {
         cell.addEventListener("click", function() {
-            if (!player) return;
+            if (!player || gameOver) return;
             determineWinner(this.id);
         });
     });
@@ -63,7 +69,13 @@ document.addEventListener("DOMContentLoaded", function() {
         message.textContent = result;
         updateFichas(result);
         setTimeout(() => {
-            playButton.style.display = "block";
+            if (fichas === 0) {
+                gameOver = true;
+                alert("Game Over! You have run out of fichas.");
+            }
+            if (!gameOver) {
+                playButton.style.display = "block";
+            }
         }, 2500);
     }
 
@@ -89,5 +101,9 @@ document.addEventListener("DOMContentLoaded", function() {
         betButtons.forEach(button => {
             button.style.display = "inline-block";
         });
+        if (fichas > 0) {
+            gameOver = false;
+        }
     }
 });
+
