@@ -1,12 +1,12 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #000; /* Fondo negro para todo el cuerpo */
-    color: #fff; /* Color de texto blanco para mejor contraste */
+    background-color: #000;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
     margin: 0;
+    color: white;
 }
 
 .game-container {
@@ -15,11 +15,9 @@ body {
     align-items: center;
     width: 80%;
     max-width: 900px;
-    background-color: #000; /* Fondo negro para el contenedor del juego */
-    border: 2px solid #ccc;
+    background-color: transparent;
     padding: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 .center {
@@ -30,7 +28,7 @@ body {
 .center-circle {
     width: 200px;
     height: 200px;
-    background-color: #006400; /* Verde oscuro para el círculo central */
+    background-color: #006400;
     border-radius: 50%;
     margin: 0 auto;
     margin-bottom: 20px;
@@ -38,6 +36,7 @@ body {
     justify-content: center;
     align-items: center;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    flex-wrap: wrap;
 }
 
 .timer {
@@ -49,7 +48,7 @@ body {
     font-size: 18px;
     font-weight: bold;
     margin-top: 10px;
-    color: #fff; /* Texto blanco */
+    color: white;
 }
 
 .player {
@@ -59,23 +58,13 @@ body {
 }
 
 .player.left {
-    border-right: 2px solid #ccc;
     padding-right: 20px;
     margin-right: 20px;
 }
 
 .player.right {
-    border-left: 2px solid #ccc;
     padding-left: 20px;
     margin-left: 20px;
-}
-
-.player.left .piece {
-    background-color: #ffa500; /* Amarillo para las fichas del jugador izquierdo */
-}
-
-.player.right .piece {
-    background-color: #ff69b4; /* Rosa para las fichas del jugador derecho */
 }
 
 .pieces-container {
@@ -88,8 +77,16 @@ body {
 .piece {
     width: 30px;
     height: 30px;
-    border: 1px solid #000; /* Borde negro */
+    border-radius: 50%;
     margin: 3px 0;
+}
+
+.player.left .piece {
+    background-color: red;
+}
+
+.player.right .piece {
+    background-color: blue;
 }
 
 input[type="number"] {
@@ -104,10 +101,9 @@ button {
     padding: 12px 24px;
     margin-bottom: 10px;
     cursor: pointer;
-    background-color: #4CAF50; /* Verde */
+    background-color: #4CAF50;
     color: white;
     border: none;
-    border-radius: 5px;
     transition: background-color 0.3s ease;
 }
 
