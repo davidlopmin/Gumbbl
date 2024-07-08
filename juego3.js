@@ -4,7 +4,6 @@ let leftSelectionConfirmed = false;
 let rightSelectionConfirmed = false;
 let timerInterval;
 
-// Function to start the 30-second timer
 function startTimer() {
     let seconds = 30;
     const timerElement = document.getElementById('timer');
@@ -17,14 +16,11 @@ function startTimer() {
             clearInterval(timerInterval);
             timerElement.textContent = `Time's up!`;
 
-            // Disable prediction inputs and move buttons
-            document.getElementById('left-prediction').disabled = true;
-            document.getElementById('right-prediction').disabled = true;
+            disablePredictionFields();
             disableMoveButtons('left');
             disableMoveButtons('right');
 
-            // Show time's up alert
-            alert('Time\'s up! You need to make your prediction and move pieces faster.');
+            alert('Time is up! You must make your prediction and move the pieces faster.');
             declareWinner();
         }
     }, 1000);
@@ -38,89 +34,87 @@ function submitPrediction(player) {
     const predictionInput = document.getElementById(`${player}-prediction`);
     const predictionValue = parseInt(predictionInput.value);
 
-    if (isNaN(predictionValue) || predictionValue < 0 || predictionValue > 6) {
+    if (!isValidPrediction(predictionValue)) {
         alert('Please enter a number between 0 and 6.');
         return;
     }
 
+    if (isDuplicatePrediction(player, predictionValue)) {
+        alert(`The ${player === 'left' ? 'right' : 'left'} player has already chosen this number. Please choose a different number.`);
+        return;
+    }
+
     if (player === 'left') {
-        if (predictionValue === rightPrediction) {
-            alert('The right player has already chosen this number. Please choose a different number.');
-            return;
-        }
         leftPrediction = predictionValue;
-    } else if (player === 'right') {
-        if (predictionValue === leftPrediction) {
-            alert('The left player has already chosen this number. Please choose a different number.');
-            return;
-        }
+    } else {
         rightPrediction = predictionValue;
     }
 
     predictionInput.disabled = true;
-    predictionInput.style.backgroundColor = '#eee';
+    predictionInput.style.backgroundColor = '#000';
 
     checkMoveButtons(player);
 }
 
+function isValidPrediction(value) {
+    return !isNaN(value) && value >= 0 && value <= 6;
+}
+
+function isDuplicatePrediction(player, value) {
+    return (player === 'left' && value === rightPrediction) || (player === 'right' && value === leftPrediction);
+}
+
 function moveToCenter(player, count) {
-    if (player === 'left' && leftPrediction !== null && !leftSelectionConfirmed) {
-        const playerElement = document.querySelector(`.player.${player}`);
-        const piecesContainer = playerElement.querySelector('.pieces-container');
+    if ((player === 'left' && !leftSelectionConfirmed && leftPrediction !== null) ||
+        (player === 'right' && !rightSelectionConfirmed && rightPrediction !== null)) {
+
+        const piecesContainer = document.querySelector(`.player.${player} .pieces-container`);
         const centerCircle = document.querySelector('.center-circle');
 
-        // Move the specified number of pieces to the center with the corresponding color
-        for (let i = 0; i < count; i++) {
-            const piece = piecesContainer.querySelector('.piece');
-            if (piece) {
-                piece.style.backgroundColor = '#FFFF00'; // Yellow for left player
-                centerCircle.appendChild(piece);
-            }
+        movePieces(piecesContainer, centerCircle, count, player);
+
+        if (player === 'left') {
+            leftSelectionConfirmed = true;
+        } else {
+            rightSelectionConfirmed = true;
         }
 
-        leftSelectionConfirmed = true;
         disableMoveButtons(player);
-    } else if (player === 'right' && rightPrediction !== null && !rightSelectionConfirmed) {
-        const playerElement = document.querySelector(`.player.${player}`);
-        const piecesContainer = playerElement.querySelector('.pieces-container');
-        const centerCircle = document.querySelector('.center-circle');
 
-        // Move the specified number of pieces to the center with the corresponding color
-        for (let i = 0; i < count; i++) {
-            const piece = piecesContainer.querySelector('.piece');
-            if (piece) {
-                piece.style.backgroundColor = '#FF69B4'; // Pink for right player
-                centerCircle.appendChild(piece);
-            }
+        if (leftSelectionConfirmed && rightSelectionConfirmed) {
+            stopTimer();
+            declareWinner();
         }
-
-        rightSelectionConfirmed = true;
-        disableMoveButtons(player);
     }
+}
 
-    // Check if both players have confirmed their selection
-    if (leftSelectionConfirmed && rightSelectionConfirmed) {
-        stopTimer();
-        declareWinner();
+function movePieces(sourceContainer, targetContainer, count, player) {
+    for (let i = 0; i < count; i++) {
+        const piece = sourceContainer.querySelector('.piece');
+        if (piece) {
+            const clonedPiece = piece.cloneNode(true);
+            clonedPiece.classList.add(`moved-${player}`);
+            targetContainer.appendChild(clonedPiece);
+            sourceContainer.removeChild(piece);
+        }
     }
 }
 
 function checkMoveButtons(player) {
-    const maxPieces = 3; // Maximum number of pieces that can be moved
-    const playerElement = document.querySelector(`.player.${player}`);
-    const piecesContainer = playerElement.querySelector('.pieces-container');
+    const maxPieces = 3;
+    const piecesContainer = document.querySelector(`.player.${player} .pieces-container`);
+    const piecesCount = piecesContainer.children.length;
 
     for (let i = 0; i <= maxPieces; i++) {
         const btn = document.getElementById(`${player}-btn-${i}`);
         if (btn) {
-            btn.disabled = i > piecesContainer.children.length || leftSelectionConfirmed || rightSelectionConfirmed;
+            btn.disabled = i > piecesCount || leftSelectionConfirmed || rightSelectionConfirmed;
         }
     }
 }
 
 function disableMoveButtons(player) {
-    const maxPieces = 3; // Maximum number of pieces that can be moved
-
+    const maxPieces = 3;
     for (let i = 0; i <= maxPieces; i++) {
         const btn = document.getElementById(`${player}-btn-${i}`);
         if (btn) {
@@ -130,20 +124,19 @@ function disableMoveButtons(player) {
 }
 
 function declareWinner() {
-    const centerCircle = document.querySelector('.center-circle');
-    const piecesInCenter = centerCircle.querySelectorAll('.piece').length;
-
+    const piecesInCenter = document.querySelectorAll('.center-circle .piece').length;
     let resultMessage = `Pieces in the center: ${piecesInCenter}. `;
+
     if (leftPrediction === piecesInCenter && rightPrediction === piecesInCenter) {
         resultMessage += "It's a tie!";
-        setTimeout(resetGame, 2000); // Automatically reset in case of a tie
+        setTimeout(resetGame, 2000);
     } else if (leftPrediction === piecesInCenter) {
         resultMessage += "Left player wins!";
     } else if (rightPrediction === piecesInCenter) {
         resultMessage += "Right player wins!";
     } else {
         resultMessage += "No player guessed correctly, it's a tie!";
-        setTimeout(resetGame, 2000); // Automatically reset in case of a tie
+        setTimeout(resetGame, 2000);
     }
 
     document.getElementById('result').textContent = resultMessage;
@@ -154,52 +147,59 @@ function resetGame() {
     rightPrediction = null;
     leftSelectionConfirmed = false;
     rightSelectionConfirmed = false;
-    document.getElementById('left-prediction').value = '';
-    document.getElementById('right-prediction').value = '';
-    document.getElementById('left-prediction').disabled = false;
-    document.getElementById('right-prediction').disabled = false;
-    document.getElementById('left-prediction').style.backgroundColor = '#fff';
-    document.getElementById('right-prediction').style.backgroundColor = '#fff';
-    disableMoveButtons('left');
-    disableMoveButtons('right');
+
+    resetPredictionFields();
+    resetPieces();
     document.getElementById('result').textContent = '';
 
-    // Reset the timer to 30 seconds and reset pieces for both players
-    stopTimer(); // First stop the current timer if it's running
-    startTimer(); // Then start a new timer
+    stopTimer();
+    startTimer();
+}
 
-    // Return pieces to their initial position (three pieces on each side)
+function resetPredictionFields() {
+    const leftPredictionInput = document.getElementById('left-prediction');
+    const rightPredictionInput = document.getElementById('right-prediction');
+
+    [leftPredictionInput, rightPredictionInput].forEach(input => {
+        input.value = '';
+        input.disabled = false;
+        input.style.backgroundColor = '#fff';
+    });
+}
+
+function disablePredictionFields() {
+    const leftPredictionInput = document.getElementById('left-prediction');
+    const rightPredictionInput = document.getElementById('right-prediction');
+
+    [leftPredictionInput, rightPredictionInput].forEach(input => {
+        input.disabled = true;
+        input.style.backgroundColor = '#000';
+    });
+}
+
+function resetPieces() {
     const leftPiecesContainer = document.querySelector('.player.left .pieces-container');
     const rightPiecesContainer = document.querySelector('.player.right .pieces-container');
     const centerCircle = document.querySelector('.center-circle');
 
-    // Remove all pieces from the center area
-    const piecesInCenter = centerCircle.querySelectorAll('.piece');
-    piecesInCenter.forEach(piece => {
-        centerCircle.removeChild(piece);
+    [leftPiecesContainer, rightPiecesContainer, centerCircle].forEach(container => {
+        while (container.firstChild) {
+            container.removeChild(container.firstChild);
+        }
     });
 
-    // Remove all pieces in player containers
-    while (leftPiecesContainer.firstChild) {
-        leftPiecesContainer.removeChild(leftPiecesContainer.firstChild);
-    }
-    while (rightPiecesContainer.firstChild) {
-        rightPiecesContainer.removeChild(rightPiecesContainer.firstChild);
-    }
-
-    // Add three pieces in each player container
     for (let i = 0; i < 3; i++) {
         const pieceLeft = document.createElement('div');
         pieceLeft.classList.add('piece');
-        pieceLeft.style.backgroundColor = '#FFFF00'; // Yellow for left player by default
+        pieceLeft.style.backgroundColor = 'red';
         leftPiecesContainer.appendChild(pieceLeft);
 
         const pieceRight = document.createElement('div');
         pieceRight.classList.add('piece');
-        pieceRight.style.backgroundColor = '#FF69B4'; // Pink for right player by default
+        pieceRight.style.backgroundColor = 'blue';
         rightPiecesContainer.appendChild(pieceRight);
     }
 }
 
-// Initialize pieces for both players
+// Initialize the pieces for both players
 resetGame();
